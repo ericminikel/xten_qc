@@ -1,9 +1,9 @@
 
 # GenotypeConcordance
-bsub -q week -P $RANDOM -J gtconc -M 8000000 \
+bsub -q week -P $RANDOM -J gtconc -M 16000000 \
             -o gtconc.o \
             -e gtconc.e \
-"java -Xmx8g -jar $gatkjar \
+"java -Xmx15g -jar $gatkjar \
               -R $b37ref \
               -T GenotypeConcordance \
               -gfe 'GQ<30' \
@@ -15,10 +15,10 @@ bsub -q week -P $RANDOM -J gtconc -M 8000000 \
 
 ## DepthOfCoverage
 # WGS
-bsub -q week -P $RANDOM -J doc -M 8000000 \
+bsub -q week -P $RANDOM -J doc -M 16000000 \
     -o docg.o \
     -e docg.e \
-"java -Xmx8g -jar $gatkjar \
+"java -Xmx15g -jar $gatkjar \
      -R $b37ref \
      -T DepthOfCoverage \
      -o wgs_doc_20_1 \
@@ -29,10 +29,10 @@ bsub -q week -P $RANDOM -J doc -M 8000000 \
      --minMappingQuality 20 \
      --countType COUNT_FRAGMENTS"
 # WES
-bsub -q week -P $RANDOM -J doc -M 8000000 \
+bsub -q week -P $RANDOM -J doc -M 16000000 \
     -o doce.o \
     -e doce.e \
-"java -Xmx8g -jar $gatkjar \
+"java -Xmx15g -jar $gatkjar \
      -R $b37ref \
      -T DepthOfCoverage \
      -o wes_doc_20_1 \

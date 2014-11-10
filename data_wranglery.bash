@@ -17,6 +17,7 @@ bsub -q week -P $RANDOM -o subs1.o -e subs1.e "java -Xmx2g -jar $gatkjar \
 zcat $wes_vcf | grep ^# | sed 's/C1675:://g' > new_wes_header.txt
 tabix -r new_wes_header.txt $wes_vcf > reheadered_wes_vcf.gz
 mv reheadered_wes_vcf.gz $wes_vcf
+tabix $wes_vcf
 
 # subset wgs vcf to gencode cds only
 bsub -q week -P $RANDOM -o subs2.o -e subs2.e "java -Xmx2g -jar $gatkjar \

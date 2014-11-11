@@ -1,6 +1,9 @@
 
 . private-paths.bash
 
+cat $fam_raw | grep -v $substring_to_grepv > sample.fam # remove some samples from the FAM for analysis
+awk '{print $2}' sample.fam > sample.list # list of samples for the transmission analysis
+
 ## subset the desired WES data
 # generate sample list. for the duplicated samples use sequencing run C1675 and not C1575
 zcat $wes_raw_vcf | grep -m 1 ^#CHROM | tr '\t' '\n' | grep -w -f wgs_sample.list - | grep -v C1575 > wes_sample.list
@@ -28,7 +31,7 @@ bsub -q week -P $RANDOM -o subs2.o -e subs2.e "java -Xmx2g -jar $gatkjar \
    -L $gencode_cds \
    -sf wgs_sample.list"
 
-# split SNPs and INDELs
+# split SNPs and INDELs in case we want to do separate GenotypeConcordance
 bsub -q week -P $RANDOM -o subs3.o -e subs3.e "java -Xmx2g -jar $gatkjar \
    -R $b37ref \
    -T SelectVariants \
@@ -39,7 +42,7 @@ bsub -q week -P $RANDOM -o subs4.o -e subs4.e "java -Xmx2g -jar $gatkjar \
    -R $b37ref \
    -T SelectVariants \
    --variant $wgs_vcf \
-   -selecType SNP \
+   -selectType SNP \
    -o wgs.snps.vcf.gz"
 bsub -q week -P $RANDOM -o subs4.o -e subs4.e "java -Xmx2g -jar $gatkjar \
    -R $b37ref \
@@ -51,5 +54,19 @@ bsub -q week -P $RANDOM -o subs5.o -e subs5.e "java -Xmx2g -jar $gatkjar \
    -R $b37ref \
    -T SelectVariants \
    --variant $wes_vcf \
-   -selecType SNP \
+   -selectType SNP \
    -o wes.snps.vcf.gz"
+
+# further subset the list of samples for the transmission analysis
+bsub -q week -P $RANDOM -o subsA.o -e subsA.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wes_vcf \
+   -o $wes_vcf_transmission \
+   -sf sample.list"
+bsub -q week -P $RANDOM -o subsB.o -e subsB.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wgs_vcf \
+   -o $wgs_vcf_transmission \
+   -sf sample.list"

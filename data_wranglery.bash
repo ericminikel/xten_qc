@@ -27,3 +27,29 @@ bsub -q week -P $RANDOM -o subs2.o -e subs2.e "java -Xmx2g -jar $gatkjar \
    -o $wgs_vcf \
    -L $gencode_cds \
    -sf wgs_sample.list"
+
+# split SNPs and INDELs
+bsub -q week -P $RANDOM -o subs3.o -e subs3.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wgs_vcf \
+   -selectType INDEL \
+   -o wgs.indels.vcf.gz"
+bsub -q week -P $RANDOM -o subs4.o -e subs4.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wgs_vcf \
+   -selecType SNP \
+   -o wgs.snps.vcf.gz"
+bsub -q week -P $RANDOM -o subs4.o -e subs4.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wes_vcf \
+   -selectType INDEL \
+   -o wes.indels.vcf.gz"
+bsub -q week -P $RANDOM -o subs5.o -e subs5.e "java -Xmx2g -jar $gatkjar \
+   -R $b37ref \
+   -T SelectVariants \
+   --variant $wes_vcf \
+   -selecType SNP \
+   -o wes.snps.vcf.gz"

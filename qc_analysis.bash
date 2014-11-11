@@ -85,10 +85,10 @@ mkdir wgs_bybam
 while read bam
 do
     sname=`echo $bam | sed 's/.*\///'`
-    bsub -q week -P $RANDOM -J doc_e -M 8000000 \
+    bsub -q week -P $RANDOM -J doc_e -M 16000000 \
         -o jobtemp/job.wes_bybam.$sname.out \
         -e jobtemp/job.wes_bybam.$sname.err \
-        "java -Xmx7g -jar $gatkjar \
+        "java -Xmx15g -jar $gatkjar \
              -R $b37ref \
              -T DepthOfCoverage \
              -o wes_bybam/cov_$sname \
@@ -102,10 +102,10 @@ done < $wes_bams
 while read bam
 do
     sname=`echo $bam | sed 's/.*\///'`
-    bsub -q week -P $RANDOM -J doc_g -M 8000000 \
+    bsub -q week -P $RANDOM -J doc_g -M 16000000 \
         -o jobtemp/job.wgs_bybam.$sname.out \
         -e jobtemp/job.wgs_bybam.$sname.err \
-        "java -Xmx7g -jar $gatkjar \
+        "java -Xmx15g -jar $gatkjar \
              -R $b37ref \
              -T DepthOfCoverage \
              -o wgs_bybam/cov_$sname \

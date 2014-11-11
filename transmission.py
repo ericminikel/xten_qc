@@ -27,7 +27,7 @@ def print_transmission(pedfile,vcfpath,biallelic_only=False,min_gq=20,min_dp=10)
     '''
     counter = 0
     children = read_ped(pedfile)
-    founders = children.keys()
+    parents = children.keys()
     if vcfpath[-3:] == ".gz": # open .vcf.gz file with gzip.open, otherwise just use open
         openfunc = gzip.open
     else:
@@ -50,19 +50,19 @@ def print_transmission(pedfile,vcfpath,biallelic_only=False,min_gq=20,min_dp=10)
                         zygosity[sample.sample] = -1
                     else:
                         zygosity[sample.sample] = map(int,sample['GT'].split("/")).count(this_alt_allele_number)
-                n_het_founders = 0
-                het_founder = ''
-                for founder in founders:
-                    n_het_founders += int(zygosity[founder] == 1)
-                    if zygosity[founder] == 1:
-                        het_founder = founder # save this one for later
-                if n_het_founders != 1:
+                n_het_parents = 0
+                het_parent = ''
+                for parent in parents:
+                    n_het_parents += int(zygosity[parent] == 1)
+                    if zygosity[parent] == 1:
+                        het_parent = parent # save this one for later
+                if n_het_parents != 1:
                     continue
                 else:
                     # we have a parent/child pair where the parent has the allele. now check if both meet quality thresholds
                     # and whether child has variant
-                    child = children[het_founder]
-                    parent_call = record.genotype(het_founder)
+                    child = children[het_parent]
+                    parent_call = record.genotype(het_parent)
                     child_call = record.genotype(child)
                     if parent_call.data.GQ < min_gq or parent_call.data.DP < min_dp or child_call.data.GQ < min_gq or child_call.data.DP < min_dp or zygosity[child] == -1:
                         continue # apply quality filters and make sure child is not no-call

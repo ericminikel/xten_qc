@@ -18,6 +18,36 @@ bsub -q week -P $RANDOM -J gtconc -M 16000000 \
 cat wgs.vs.wes.gq30dp10.molt | grep -A 1 ^#:GATKTable:GenotypeConcordance_EvalProportions > wgs.vs.wes.gq30dp10.molt.all.concordance.proportions
 cat wgs.vs.wes.gq30dp10.molt | grep -A 400 ^#:GATKTable:GenotypeConcordance_EvalProportions | grep ^ALL >> wgs.vs.wes.gq30dp10.molt.all.concordance.proportions
 
+# GenotypeConcordance separately for SNPs and INDELs
+bsub -q week -P $RANDOM -J gtc_snps -M 16000000 \
+            -o gtconc_snps.o \
+            -e gtconc_snps.e \
+"java -Xmx15g -jar $gatkjar \
+              -R $b37ref \
+              -T GenotypeConcordance \
+              -gfe 'GQ<30' \
+              -gfe 'DP<30' \
+              -gfc 'GQ<30' \
+              -gfc 'DP<30' \
+              -comp wes.snps.vcf.gz \
+              -eval wgs.snps.vcf.gz \
+              -moltenize \
+              -o wgs.vs.wes.gq30dp30.snps.molt"
+bsub -q week -P $RANDOM -J gtc_indels -M 16000000 \
+            -o gtconc_indels.o \
+            -e gtconc_indels.e \
+"java -Xmx15g -jar $gatkjar \
+              -R $b37ref \
+              -T GenotypeConcordance \
+              -gfe 'GQ<30' \
+              -gfe 'DP<30' \
+              -gfc 'GQ<30' \
+              -gfc 'DP<30' \
+              -comp wes.indels.vcf.gz \
+              -eval wgs.indels.vcf.gz \
+              -moltenize \
+              -o wgs.vs.wes.gq30dp30.indels.molt"
+
 ## DepthOfCoverage
 # WGS
 bsub -q week -P $RANDOM -J doc -M 24000000 \

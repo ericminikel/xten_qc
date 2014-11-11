@@ -87,4 +87,7 @@ do
              --countType COUNT_FRAGMENTS"
 done < $wgs_bams
 
+# will need to redo these later once $wgs_vcf_transmission is finished
+bsub -q week -P $RANDOM -J tx_wgs -M 8000000 -o tx_wgs.o -e tx_wgs.e "export PYTHONPATH=$PYTHONPATH; transmission.py --pedfile sample.fam --vcfpath $wgs_vcf --biallelic_only > wgs_tx.txt"
+bsub -q week -P $RANDOM -J tx_wes -M 8000000 -o tx_wes.o -e tx_wes.e "export PYTHONPATH=$PYTHONPATH; transmission.py --pedfile sample.fam --vcfpath $wes_vcf --biallelic_only > wes_tx.txt"
 

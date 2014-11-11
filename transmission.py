@@ -18,13 +18,16 @@ def read_ped(pedfile):
                 d[mother] = iid
     return d
 
-def print_transmission(pedfile,vcfpath,biallelic_only=False):
+def print_transmission(pedfile,vcfpath,biallelic_only=False,min_gq=20,min_dp=10):
     '''
-    Loop through a VCF file and print out info about transmission
+    Loop through a VCF file and print out info about transmission.
+    Requires a PED file, and the VCF and PED need to contain *only*
+    trios comprised of two parents and a child. No other family
+    structures will give correct results.
     '''
     counter = 0
-    ped = read_ped(pedfile)
-    founders = ped.keys()
+    children = read_ped(pedfile)
+    founders = children.keys()
     if vcfpath[-3:] == ".gz": # open .vcf.gz file with gzip.open, otherwise just use open
         openfunc = gzip.open
     else:
@@ -41,29 +44,38 @@ def print_transmission(pedfile,vcfpath,biallelic_only=False):
             else:
                 indel = len(alt) != len(record.REF)
                 filterstatus = 'PASS' if len(record.FILTER) < 1 else record.FILTER[0]
-                is_het = {}
+                zygosity = {} # dictionary for zygosity of each person for this allele. -1 = no call, 0, 1, 2 = num alleles
                 for sample in record.samples:
                     if sample['GT'] is None:
-                        is_het[sample.sample] = False
+                        zygosity[sample.sample] = -1
                     else:
-                        is_het[sample.sample] = map(int,sample['GT'].split("/")).count(this_alt_allele_number) == 1
+                        zygosity[sample.sample] = map(int,sample['GT'].split("/")).count(this_alt_allele_number)
                 n_het_founders = 0
                 het_founder = ''
                 for founder in founders:
-                    n_het_founders += int(is_het[founder])
-                    if is_het[founder]:
+                    n_het_founders += int(zygosity[founder] == 1)
+                    if zygosity[founder] == 1:
                         het_founder = founder # save this one for later
                 if n_het_founders != 1:
                     continue
                 else:
-                    if is_het[ped[het_founder]]:
-                        transmitted = True
+                    # we have a parent/child pair where the parent has the allele. now check if both meet quality thresholds
+                    # and whether child has variant
+                    child = children[het_founder]
+                    parent_call = record.genotype(het_founder)
+                    child_call = record.genotype(child)
+                    if parent_call.data.GQ < min_gq or parent_call.data.DP < min_dp or child_call.data.GQ < min_gq or child_call.data.DP < min_dp or zygosity[child] == -1:
+                        continue # apply quality filters and make sure child is not no-call
                     else:
-                        transmitted = False
-                    print record.CHROM, record.POS, record.REF, alt, record.QUAL, filterstatus, str(int(indel)), str(int(transmitted))
+                        if zygosity[child] == 1:
+                            transmitted = True
+                        else:
+                            assert zygosity[child] == 0, "Child %s has zygosity %s"%(child,zygosity[child])
+                            transmitted = False
+                        print record.CHROM, record.POS, record.REF, alt, record.QUAL, filterstatus, str(int(indel)), str(int(transmitted))
 
 def main(args):
-    print_transmission(args.pedfile,args.vcfpath,args.biallelic_only)
+    print_transmission(args.pedfile,args.vcfpath,args.biallelic_only,args.min_gq,args.min_dp)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate a null distribution of diversity scores')
@@ -73,5 +85,9 @@ if __name__ == '__main__':
                     help='path to VCF (optionally gzipped)', type=str)
     parser.add_argument('--biallelic_only', dest='biallelic_only', action='store_true',
                     help='skip multi-allelic sites')
+    parser.add_argument('--min_gq', dest='min_gq', action='store', default=20,
+                    help='Minimum genotype quality to include', type=int)
+    parser.add_argument('--min_dp', dest='min_dp', action='store', default=10,
+                    help='Minimum genotype depth to include', type=int)
     args = parser.parse_args()
     main(args)

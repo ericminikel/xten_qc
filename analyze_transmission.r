@@ -14,8 +14,24 @@ colnames(tx) = c("CHROM","POS","REF","ALT","QUAL","FILTER","INDEL","TRANSMITTED"
 tx$INDEL = tx$INDEL==1 # change from int to boolean
 
 # overall transmission rate
-overall_tx_rate     = mean(as.numeric(tx$TRANSMITTED))
-snp_tx_rate         = mean(as.numeric(tx$TRANSMITTED[!tx$INDEL]))
-indel_tx_rate       = mean(as.numeric(tx$TRANSMITTED[tx$INDEL]))
-pass_tx_rate        = mean(as.numeric(tx$TRANSMITTED[tx$FILTER=="PASS"]))
-filtered_tx_rate    = mean(as.numeric(tx$TRANSMITTED[tx$FILTER!="PASS"]))
+overall_tx_rate         = mean(as.numeric(tx$TRANSMITTED))
+snp_tx_rate             = mean(as.numeric(tx$TRANSMITTED[!tx$INDEL]))
+indel_tx_rate           = mean(as.numeric(tx$TRANSMITTED[tx$INDEL]))
+pass_tx_rate            = mean(as.numeric(tx$TRANSMITTED[tx$FILTER=="PASS"]))
+filtered_tx_rate        = mean(as.numeric(tx$TRANSMITTED[tx$FILTER!="PASS"]))
+
+snp_pass_tx_rate        = mean(as.numeric(tx$TRANSMITTED[!tx$INDEL & tx$FILTER=="PASS"]))
+indel_pass_tx_rate      = mean(as.numeric(tx$TRANSMITTED[tx$INDEL & tx$FILTER=="PASS"]))
+snp_filtered_tx_rate    = mean(as.numeric(tx$TRANSMITTED[!tx$INDEL & tx$FILTER!="PASS"]))
+indel_filtered_tx_rate  = mean(as.numeric(tx$TRANSMITTED[tx$INDEL & tx$FILTER!="PASS"]))
+
+cat(paste("overall_tx_rate        ",overall_tx_rate       ,"\n"))
+cat(paste("snp_tx_rate            ",snp_tx_rate           ,"\n"))
+cat(paste("indel_tx_rate          ",indel_tx_rate         ,"\n"))
+cat(paste("pass_tx_rate           ",pass_tx_rate          ,"\n"))
+cat(paste("filtered_tx_rate       ",filtered_tx_rate      ,"\n"))
+cat(paste("snp_pass_tx_rate       ",snp_pass_tx_rate      ,"\n"))
+cat(paste("indel_pass_tx_rate     ",indel_pass_tx_rate    ,"\n"))
+cat(paste("snp_filtered_tx_rate   ",snp_filtered_tx_rate  ,"\n"))
+cat(paste("indel_filtered_tx_rate ",indel_filtered_tx_rate,"\n"))
+

@@ -8,17 +8,17 @@ bsub -q week -P $RANDOM -J gtconc -M 16000000 \
 "java -Xmx15g -jar $gatkjar \
               -R $b37ref \
               -T GenotypeConcordance \
-              -gfe 'GQ<30' \
+              -gfe 'GQ<20' \
               -gfe 'DP<10' \
-              -gfc 'GQ<30' \
+              -gfc 'GQ<20' \
               -gfc 'DP<10' \
               -comp $wes_vcf \
               -eval $wgs_vcf \
               -moltenize \
-              -o wgs.vs.wes.gq30dp10.molt"
+              -o wgs.vs.wes.gq20dp10.molt"
 # extract the one line with the overall summary of concordance for all samples
-cat wgs.vs.wes.gq30dp10.molt | grep -A 1 ^#:GATKTable:GenotypeConcordance_EvalProportions > wgs.vs.wes.gq30dp10.molt.all.concordance.proportions
-cat wgs.vs.wes.gq30dp10.molt | grep -A 400 ^#:GATKTable:GenotypeConcordance_EvalProportions | grep ^ALL >> wgs.vs.wes.gq30dp10.molt.all.concordance.proportions
+cat wgs.vs.wes.gq20dp10.molt | grep -A 1 ^#:GATKTable:GenotypeConcordance_EvalProportions > wgs.vs.wes.gq20dp10.molt.all.concordance.proportions
+cat wgs.vs.wes.gq20dp10.molt | grep -A 400 ^#:GATKTable:GenotypeConcordance_EvalProportions | grep ^ALL >> wgs.vs.wes.gq20dp10.molt.all.concordance.proportions
 
 bsub -q week -P $RANDOM -J gtconc -M 16000000 \
             -o gtconc.o \
@@ -26,16 +26,16 @@ bsub -q week -P $RANDOM -J gtconc -M 16000000 \
 "java -Xmx15g -jar $gatkjar \
               -R $b37ref \
               -T GenotypeConcordance \
-              -gfe 'GQ<30' \
+              -gfe 'GQ<20' \
               -gfe 'DP<10' \
-              -gfc 'GQ<30' \
+              -gfc 'GQ<20' \
               -gfc 'DP<10' \
               -comp $wgs_vcf \
               -eval $wes_vcf \
               -moltenize \
-              -o wes.vs.wgs.gq30dp10.molt"
-cat wes.vs.wgs.gq30dp10.molt | grep -A 1 ^#:GATKTable:GenotypeConcordance_EvalProportions > wes.vs.wgs.gq30dp10.molt.all.concordance.proportions
-cat wes.vs.wgs.gq30dp10.molt | grep -A 400 ^#:GATKTable:GenotypeConcordance_EvalProportions | grep ^ALL >> wes.vs.wgs.gq30dp10.molt.all.concordance.proportions
+              -o wes.vs.wgs.gq20dp10.molt"
+cat wes.vs.wgs.gq20dp10.molt | grep -A 1 ^#:GATKTable:GenotypeConcordance_EvalProportions > wes.vs.wgs.gq20dp10.molt.all.concordance.proportions
+cat wes.vs.wgs.gq20dp10.molt | grep -A 400 ^#:GATKTable:GenotypeConcordance_EvalProportions | grep ^ALL >> wes.vs.wgs.gq20dp10.molt.all.concordance.proportions
 
 
 # GenotypeConcordance separately for SNPs and INDELs

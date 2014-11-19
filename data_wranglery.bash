@@ -17,6 +17,19 @@ bsub -q week -P $RANDOM -o subs1.o -e subs1.e "java -Xmx2g -jar $gatkjar \
    -env \
    -sf wes_sample.list"
 
+# # to redo with -env if the above step was run without -env the first time
+# cat wes_sample.list | sed 's/C1675:://g' > wes_sample.new.list
+# bsub -q priority -P $RANDOM -o subsx.o -e subsx.e "java -Xmx2g -jar $gatkjar \
+#    -R $b37ref \
+#    -T SelectVariants \
+#    --variant wes.backup.vcf.gz \
+#    -o $wes_vcf \
+#    -L $gencode_cds \
+#    -env \
+#    -sf wes_sample.new.list"
+
+   
+
 # now rename the C1675 samples to match the WGS VCF
 zcat $wes_vcf | grep ^# | sed 's/C1675:://g' > new_wes_header.txt
 tabix -r new_wes_header.txt $wes_vcf > reheadered_wes_vcf.gz

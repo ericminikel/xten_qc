@@ -80,4 +80,11 @@ plot(depth$WGSDP, depth$WESDP, pch='.', xlim=c(0,200),ylim=c(0,200),
 # define problem intervals where WGS depth is < 10 and 
 wgs_lowcov = depth$WGSDP < 10
 cor.test(depth$WGSDP-depth$WESDP, depth$GC)
+sum(wgs_lowcov)/dim(depth)[1]
 
+wgs_problem = depth$WGSDP < 10 & depth$WGSDP < depth$WESDP
+sum(wgs_problem)/dim(depth)[1]
+
+# rough estimate of mean depth (though would need to weight by interval size to be exact)
+mean(depth$WGSDP)
+mean(depth$WESDP)

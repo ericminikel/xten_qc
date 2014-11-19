@@ -1,7 +1,8 @@
 
 # next time try bsub -R rusage[mem=16G]
 
-# GenotypeConcordance
+#### GenotypeConcordance
+
 bsub -q week -P $RANDOM -J gtconc -M 16000000 \
             -o gtconc.o \
             -e gtconc.e \
@@ -68,37 +69,9 @@ bsub -q week -P $RANDOM -J gtc_indels -M 16000000 \
               -moltenize \
               -o wgs.vs.wes.gq30dp30.indels.molt"
 
-## DepthOfCoverage
-# WGS
-bsub -q week -P $RANDOM -J doc -M 24000000 \
-    -o docg.o \
-    -e docg.e \
-"java -Xmx23g -jar $gatkjar \
-     -R $b37ref \
-     -T DepthOfCoverage \
-     -o wgs_doc_20_1 \
-     -I $wgs_bams \
-     -L $gencode_cds \
-     --omitDepthOutputAtEachBase \
-     --minBaseQuality 20 \
-     --minMappingQuality 20 \
-     --countType COUNT_FRAGMENTS"
-# WES
-bsub -q week -P $RANDOM -J doc -M 24000000 \
-    -o doce.o \
-    -e doce.e \
-"java -Xmx23g -jar $gatkjar \
-     -R $b37ref \
-     -T DepthOfCoverage \
-     -o wes_doc_20_1 \
-     -I $wes_bams \
-     -L $gencode_cds \
-     --omitDepthOutputAtEachBase \
-     --minBaseQuality 20 \
-     --minMappingQuality 20 \
-     --countType COUNT_FRAGMENTS"
+#### Depth calculations
+## using DiagnoseTargets instead of DepthOfCoverage
 
-## DiagnoseTargets instead of DepthOfCoverage
 bsub -q week -P $RANDOM -J doc -M 24000000 \
     -o docg.o \
     -e docg.e \
@@ -108,7 +81,7 @@ bsub -q week -P $RANDOM -J doc -M 24000000 \
      -BQ 20 \
      -MQ 20 \
      -min 10 \
-     -o wgs_diagnosetargets.vcf \
+     -o wgs.diagnosetargets.vcf \
      -I $wgs_bams \
      -L $gencode_cds"
 bsub -q week -P $RANDOM -J doc -M 24000000 \
@@ -120,48 +93,15 @@ bsub -q week -P $RANDOM -J doc -M 24000000 \
      -BQ 20 \
      -MQ 20 \
      -min 10 \
-     -o wes_diagnosetargets.vcf \
+     -o wes.diagnosetargets.vcf \
      -I $wes_bams \
      -L $gencode_cds"
 
+/humgen/atgu1/fs03/konradk/src/tableize_vcf.py --vcf wgs.diagnosetargets.vcf --info ".*"
+/humgen/atgu1/fs03/konradk/src/tableize_vcf.py --vcf wes.diagnosetargets.vcf --info ".*"
 
-mkdir jobtemp
-mkdir wes_bybam
-mkdir wgs_bybam
-while read bam
-do
-    sname=`echo $bam | sed 's/.*\///'`
-    bsub -q week -P $RANDOM -J doc_e -M 16000000 \
-        -o jobtemp/job.wes_bybam.$sname.out \
-        -e jobtemp/job.wes_bybam.$sname.err \
-        "java -Xmx15g -jar $gatkjar \
-             -R $b37ref \
-             -T DepthOfCoverage \
-             -o wes_bybam/cov_$sname \
-             -I $wes_bams \
-             -L $gencode_cds \
-             --omitDepthOutputAtEachBase \
-             --minBaseQuality 20 \
-             --minMappingQuality 20 \
-             --countType COUNT_FRAGMENTS"
-done < $wes_bams
-while read bam
-do
-    sname=`echo $bam | sed 's/.*\///'`
-    bsub -q week -P $RANDOM -J doc_g -M 16000000 \
-        -o jobtemp/job.wgs_bybam.$sname.out \
-        -e jobtemp/job.wgs_bybam.$sname.err \
-        "java -Xmx15g -jar $gatkjar \
-             -R $b37ref \
-             -T DepthOfCoverage \
-             -o wgs_bybam/cov_$sname \
-             -I $wgs_bams \
-             -L $gencode_cds \
-             --omitDepthOutputAtEachBase \
-             --minBaseQuality 20 \
-             --minMappingQuality 20 \
-             --countType COUNT_FRAGMENTS"
-done < $wgs_bams
+#### Transmission
+
 
 bsub -q hour -P $RANDOM -J tx_wgs -M 8000000 -o tx_wgs.o -e tx_wgs.e "export PYTHONPATH=$PYTHONPATH; transmission.py --pedfile sample.fam --vcfpath $wgs_vcf_transmission --biallelic_only > wgs_tx.txt"
 bsub -q hour -P $RANDOM -J tx_wes -M 8000000 -o tx_wes.o -e tx_wes.e "export PYTHONPATH=$PYTHONPATH; transmission.py --pedfile sample.fam --vcfpath $wes_vcf_transmission --biallelic_only > wes_tx.txt"

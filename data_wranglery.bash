@@ -14,6 +14,7 @@ bsub -q week -P $RANDOM -o subs1.o -e subs1.e "java -Xmx2g -jar $gatkjar \
    --variant $wes_raw_vcf \
    -o $wes_vcf \
    -L $gencode_cds \
+   -env \
    -sf wes_sample.list"
 
 # now rename the C1675 samples to match the WGS VCF
@@ -29,6 +30,7 @@ bsub -q week -P $RANDOM -o subs2.o -e subs2.e "java -Xmx2g -jar $gatkjar \
    --variant $wgs_raw_vcf \
    -o $wgs_vcf \
    -L $gencode_cds \
+   -env \
    -sf wgs_sample.list"
 
 # split SNPs and INDELs in case we want to do separate GenotypeConcordance

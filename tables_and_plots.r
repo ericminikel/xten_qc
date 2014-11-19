@@ -76,3 +76,8 @@ plot(depth$WGSDP, depth$WESDP, pch='.', xlim=c(0,200),ylim=c(0,200),
      xlab='X Ten whole genome depth', ylab='HiSeq 2000 ICE exome depth',
      main='WGS vs. WES depth. Each point is mean coverage\nof a Gencode CDS interval across 24 people',
      cex.main=.8)
+
+# define problem intervals where WGS depth is < 10 and 
+wgs_lowcov = depth$WGSDP < 10
+cor.test(depth$WGSDP-depth$WESDP, depth$GC)
+
